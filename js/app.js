@@ -74,32 +74,6 @@ function shuffleDeck    () {
 // Define a display function and tag opened card 
 function showCard(card) {
     card.addClass("open show");
-    openCards.push(card);
-}
-
-// Verify if there is a match
-function checkCards(card) {
-    // Compare first card and second card stored in openCards tocheck if there is a match
-    if (openCards.length > 0 && openCards[0][0].firstChild.className == openCards[1][0].firstChild.className ) {
-        // Add class "match" to each card
-        openCards[0].addClass("match");    
-        openCards[1].addClass("match");    
-        // Reset openCards
-        openCards = [];
-        // Verify if all cards have been found and matched
-        checkGameFinished();
-        // Modify the class if there is no match
-        } else if (openCards.length >0 && openCards[0][0].firstChild.className !== openCards[1][0].firstChild.className )  {
-        openCards[0].addClass("no-match");
-        openCards[1].addClass("no-match");
-        // Reset class of unmatched cards
-        setTimeout(function () {
-                openCards[0].removeClass("open show no-match");
-                openCards[1].removeClass("open show no-match");
-                openCards = [];
-            }, 400);
-        }
-    countMoves();
 }
 
 // Trigger the showCard and checkCards functions on a card click to edit their classes and verify if there is a match
@@ -108,10 +82,53 @@ $('.deck').on('click', '.card', function (event) {
     // Start timer on first click
     timer.start();
     showCard(lastClickedCard);
+    trackCards(lastClickedCard);
     setTimeout(function () {
         checkCards(lastClickedCard);
     }, 300);
 });
+
+// Function to differentiate first clicked card from the second one
+function trackCards(card) {
+    if (openCards.length === 0) { 
+      card.attr("id", "firstCard");
+      openCards.push(card);
+    } else if (openCards.length === 1 && card.attr("id") !== "firstCard") { 
+      card.attr("id", "secondCard");
+      openCards.push(card);
+      checkCards();
+    } else { 
+      alert("You clicked the same card! Please click another card to keep playing.");
+    }
+  }
+
+// Verify if there is a match
+function checkCards(card) {
+    // Compare first card and second card stored in openCards to check if there is a match
+        if ( openCards[0][0].firstChild.className == openCards[1][0].firstChild.className ) {
+        // Add class "match" to each card
+        openCards[0].addClass("match").removeAttr("id");    
+        openCards[1].addClass("match").removeAttr("id");    
+        // Reset openCards
+        openCards = [];
+        // Verify if all cards have been found and matched
+        checkGameFinished();
+        countMoves();
+        // Modify the class if there is no match
+        } else if (openCards[0][0].firstChild.className !== openCards[1][0].firstChild.className )  {
+        openCards[0].addClass("no-match").removeAttr("id");
+        openCards[1].addClass("no-match").removeAttr("id");
+        // Reset class of unmatched cards
+        setTimeout(function () {
+                openCards[0].removeClass("open show no-match").removeAttr("id");
+                openCards[1].removeClass("open show no-match").removeAttr("id");
+                openCards = [];
+            }, 400);
+        countMoves();
+        }
+}
+
+
 
 // Check if all cards matched and show the winning page if the 
 function checkGameFinished() {
@@ -148,18 +165,18 @@ function initStars() {
 
 // Set the level of stars depending on the number of moves used to finish
 function updateStars() {
-    if (nbMoves <= 15) {
+    if (nbMoves <= 10) {
         $('.stars .fa').addClass("fa-star");
         stars = 3;
-    } else if(nbMoves >= 16 && nbMoves <= 18){
+    } else if(nbMoves >= 13 && nbMoves <= 16){
         $('.stars li:last-child .fa').removeClass("fa-star");
         $('.stars li:last-child .fa').addClass("fa-star-o");
         stars = 2;
-    } else if (nbMoves >= 19 && nbMoves <=21){
+    } else if (nbMoves >= 17 && nbMoves <=22){
         $('.stars li:nth-child(2) .fa').removeClass("fa-star");
         $('.stars li:nth-child(2) .fa').addClass("fa-star-o");
         stars = 1;
-    } else if (nbMoves >=22){
+    } else if (nbMoves >22){
         $('.stars li .fa').removeClass("fa-star");
         $('.stars li .fa').addClass("fa-star-o");
         stars = 0;
